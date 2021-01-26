@@ -1,6 +1,6 @@
 ## Title: ESO Grinder
 ## Author: Marc Jordan
-## APIVersion: 100028
+## APIVersion: 100033
 ## SavedVariables: EsoGrinderSavedVariables
 
 ##
