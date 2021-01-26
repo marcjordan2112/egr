@@ -83,6 +83,9 @@ If opening the database with a tool then open as read-only, otherwise there will
 
 # Change List
 
+- 1.0.2
+    - Remove dev debug prints.
+
 - 1.0.1
     - Add .gitignore.
     - Update API version to 100033.
