@@ -25,6 +25,7 @@ In-game console commands:
 - /egrstart Start EGR.
 - /egrstop Stop EGR.
 - /egrdebug Toggle debug.
+- /egrapiversion Show ESO API version. Debug must be enabled to see output.
 
 todo:
 
@@ -65,8 +66,6 @@ Run the following to install
 
     $pip install -r requirements.txt
 
-
-
 ## Usage
 
 Run
@@ -81,3 +80,14 @@ todo:
 The EFSM database is a standard SQLite database. It may be viewed by any standard SQLite tools.
 
 If opening the database with a tool then open as read-only, otherwise there will be conflicts with the EFSM at run time.
+
+# Change List
+
+- 1.0.1
+    - Add .gitignore.
+    - Update API version to 100033.
+    - Add /egrapiversion utility command.
+    
+- 1.0.0
+    - Initial release for ESO Api version .
+
