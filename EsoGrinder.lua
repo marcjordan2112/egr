@@ -108,7 +108,6 @@ function EsoGrinder.OnSlashCommandStop(extra)
 end
 
 function EsoGrinder.OnSlashCommandApiVersion(extra)
-    d("EGR: wat")
     EsoGrinder.DebugPrint(string.format("EGR: ESO APIVersion = %s",GetAPIVersion()))
 end
 
