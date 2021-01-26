@@ -107,9 +107,15 @@ function EsoGrinder.OnSlashCommandStop(extra)
     d("EGR: Stopped.")
 end
 
+function EsoGrinder.OnSlashCommandApiVersion(extra)
+    d("EGR: wat")
+    EsoGrinder.DebugPrint(string.format("EGR: ESO APIVersion = %s",GetAPIVersion()))
+end
+
 SLASH_COMMANDS["/egrdebug"] = EsoGrinder.OnSlashCommandDebug
 SLASH_COMMANDS["/egrstart"] = EsoGrinder.OnSlashCommandStart
 SLASH_COMMANDS["/egrstop"] = EsoGrinder.OnSlashCommandStop
+SLASH_COMMANDS["/egrapiversion"] = EsoGrinder.OnSlashCommandApiVersion
 
 function EsoGrinder.LootLog(ec,rv,nm,qt,sd,ty,sf,pk,ic,itemId,st) -- EVENT_LOOT_RECEIVED ---------------=
     --d('LootLog')
