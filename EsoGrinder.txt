@@ -1,6 +1,9 @@
 ## Title: ESO Grinder
+## Description: Log loot to your ESO save file and from there to a database.
 ## Author: Marc Jordan
-## APIVersion: 100033
+## Version: 2.0.0
+## AddOnVersion: 2.0.0
+## APIVersion: 100028 100033
 ## SavedVariables: EsoGrinderSavedVariables
 
 ##
