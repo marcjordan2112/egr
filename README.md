@@ -1,14 +1,46 @@
-# Introduction
-ESO Grinder (EGR) is an Elder Scrolls Online addon that monitors loot and saves it to the user's ESO save file. The ESO Save File Monitor (ESFM) Python code polls the save file every 3 seconds and if new loot is found then adds it to a user-specified database.
+# INTRODUCTION
+ESO Grinder (EGR) has two components:
 
-The user first runs the ESFM Python script on a command line (CL), specifying the user's ESO @PlayerName, path to ESO save file, and path to the database file. Then the user simply plays ESO (with the EGR addon installed) and "it just works" :) All items added to the database are shown in the EFSM output window. Currently, it's up to the user to decide what to do with the database.
+- EGR "ESO Grinder" is an Elder Scrolls Online addon that monitors loot and saves it to the user's ESO save file.
+- ESFM "Elder Scrolls Save File Monitor" is Python code that monitors the ESO user save file if new loot is found then adds it to a user-specified database.
+
+These two componenents must be run concurrently - there's really no need to run the addon without the Python.
 
 EGR was inspired by https://forums.elderscrollsonline.com/en/discussion/comment/5259194/#Comment_5259194
+<br>What's a good way to measure loot efficiency? I wanted to see how many worms could be harvested with this method vs any other method. At first I made a dreadful manually-maintained solution but knew that it was just the initial stepping stone in learning some basics of how ESO, Git, LUA, and some other things work.
 
-# Important
-- Wait at least 3 seconds after closing ESO, reloading the UI, or logging out before you close an ESFM instance. 
+This project is maintained at [https://github.com/marcjordan2112/egr](https://github.com/marcjordan2112/egr)
 
-# ESO Grinder
+## COMPATIBILITY
+EGR is compatible with
+
+- Python 3.7.4 or greater
+- Windows
+- Mac (not tested)
+
+# Usage
+
+1. Install EGR (see below).
+2. Run the ESFM Python script on a command line (CL), specifying the user's ESO @PlayerName, path to ESO save file, and path to the database file.
+3. Play ESO. As you play, EGR will cache loot items and when ESO performs a save to the addon's save file EsoGrinderSaveFile the entire cache will be included. The ESFM will wake up if the EsoGrinderSaveFile changes and will save all new loot to the database.
+4. The database may be connected to any process as read-only while ESFM is running. 
+
+> NOTE There is currently no limit on how many loot items get stored. So, at some point, if something doesn't trigger a save, it will probably crash :0 I've been playing with this mod for a year or so now and the most I've seen is around 180 items saved in one shot. I've gotten in the habbit of running /reloadui frequently so I don't hit any limits.
+
+Currently, it's up to the user to decide what to do with the database.
+
+# IMPORTANT
+- The Python code waits for the contents of the EsoGrinderSaveFile to change. Please ensure that you wait to exit the Python code for a few seconds after triggering a save file event. 
+
+# VERSIONING
+
+Version format major.minor.derp, or x.x.x:
+
+- major: Change to the database design.
+- minor: Change to API, add big features.
+- derp: Bug fixes, change to dox.  
+
+# EGR ESO GRINDER ADDON
 
 ## Installation
 
@@ -59,7 +91,7 @@ Teleports don't seem to reliably do it. If you notice other predictable conditio
     - Creation
     - Traded
 
-# ESO Save File Monitor
+# ESFM ESO SAVE FILE MONITOR PYTHON
 
 ## Installation
 Run the following to install 
@@ -77,11 +109,20 @@ todo:
 - [x]  Pull in python args, define usage in one place.
 
 ## Database
-The EFSM database is a standard SQLite database. It may be viewed by any standard SQLite tools.
+The ESFM database is a standard SQLite database. It may be viewed by any standard SQLite tools.
 
-If opening the database with a tool then open as read-only, otherwise there will be conflicts with the EFSM at run time.
+If opening the database with a tool then open as read-only, otherwise there will be conflicts with the ESFM at run time.
 
-# Change List
+# CHANGE LIST
+
+- 2.1.0
+    - ESFM: Add watchdog method of catching changes to the ESO save file as default. Add command line option to use the old poll method. This is a major performance update - thanks to [https://www.esoui.com/forums/showpost.php?p=43109&postcount=4](https://www.esoui.com/forums/showpost.php?p=43109&postcount=4)
+    - ESFM: Add Ctrl-C to exit.
+    - ESFM: Discard playground Utils.ThreadSafePrint in favor of the standard Python logging module.
+    - ESFM: Update Utils.MyThread to fix async issues.
+    - ESFM: Add support for database changes and updates - WIP and not supported.
+    - ESFM: PEP8 update for method decorations.
+    - ESFM: Add some horrible docstrings.
 
 - 2.0.0
     - Change the name of the installation file/directory from "egr-x.x.x" to "EsoGrinder".
