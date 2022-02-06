@@ -152,7 +152,7 @@ end
 function EsoGrinder.EventMoneyUpdateHandler(newMoney, oldMoney, thisReason)
     EsoGrinder.DebugPrintInFunction("EventMoneyUpdateHandler")
 
-    local delta_amount = oldMoney - newMoney
+    local delta_amount = newMoney - oldMoney
     local reason = thisReason
     local use_ecl = false
 
@@ -173,7 +173,7 @@ end
 function EsoGrinder.EventCurrencyUpdateHandler(eventCode, currencyType, currencyLocation, newAmount, oldAmount, thisReason )
     EsoGrinder.DebugPrintInFunction("EventCurrencyUpdateHandler")
 
-    local delta_amount = oldAmount - newAmount
+    local delta_amount = newAmount - oldAmount
     local currency_type = currencyType
     local currency_location = currencyLocation
     local reason = thisReason
