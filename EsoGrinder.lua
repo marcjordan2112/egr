@@ -32,12 +32,18 @@ end
 function EsoGrinder.RegisterForAllEvents(extra)
     EsoGrinder.DebugPrintInFunction("RegisterForAllEvents")
 
+    EVENT_MANAGER:RegisterForEvent(EsoGrinder.name,EVENT_LOOT_RECEIVED,EsoGrinder.EventLootReceivedHandler)
+    EVENT_MANAGER:RegisterForEvent(EsoGrinder.name,EVENT_INVENTORY_SINGLE_SLOT_UPDATE,EsoGrinder.EventInventorySingleSlotUpdateHandler)
+    EVENT_MANAGER:RegisterForEvent(EsoGrinder.name,EVENT_MONEY_UPDATE,EsoGrinder.EventMoneyUpdateHandler)
     EVENT_MANAGER:RegisterForEvent(EsoGrinder.name,EVENT_CURRENCY_UPDATE,EsoGrinder.EventCurrencyUpdateHandler)
 end
 
 function EsoGrinder.UnregisterAllEvents(extra)
     EsoGrinder.DebugPrintInFunction("UnregisterAllEvents")
 
+    EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name, EVENT_LOOT_RECEIVED)
+    EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name, EVENT_MONEY_UPDATE)
     EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name, EVENT_CURRENCY_UPDATE)
 end
 
@@ -92,12 +98,82 @@ SLASH_COMMANDS["/egrstart"] = EsoGrinder.OnSlashCommandStart
 SLASH_COMMANDS["/egrstop"] = EsoGrinder.OnSlashCommandStop
 SLASH_COMMANDS["/egrversion"] = EsoGrinder.OnSlashCommandVersion
 
+function EsoGrinder.EventLootReceivedHandler(eventCode, lootedBy, itemLink, quantity, itemSound, lootType, isStolen)
+    EsoGrinder.DebugPrintInFunction("EventLootReceivedHandler")
+
+    local loot_type = lootType
+    local use_ecl = false
+
+    if use_ecl then
+        EsoGrinder.DebugPrint ( "Using esoui_constants_live.lua functions." )
+        -- currency_type = LootType_get_string(lootType)
+    end
+
+    local z = zo_strformat ( "eventCode=<<1>>, lootedBy=<<2>>, itemLink=<<3>>, quantity=<<4>>, itemSound=<<5>>,",
+            eventCode,
+            lootedBy,
+            itemLink,
+            quantity,
+            itemSound)
+
+    local z2 = zo_strformat ( "<<1>> lootType=<<2>>=<<3>>, isStolen=<<4>>",
+            z,
+            lootType,
+            loot_type,
+            isStolen)
+
+    EsoGrinder.DebugPrint(z2)
+end
+
+function EsoGrinder.EventInventorySingleSlotUpdateHandler(eventCode, badId, slotIndex, isNewItem, itemSoundCategory, inventoryUpdateReason, stackCountChange)
+    EsoGrinder.DebugPrintInFunction("EventInventorySingleSlotUpdateHandler")
+
+    local use_ecl = false
+
+    if use_ecl then
+        EsoGrinder.DebugPrint ( "Using esoui_constants_live.lua functions." )
+    end
+
+    local z = zo_strformat ( "eventCode=<<1>>, bagId=<<2>>, slotIndex=<<3>>, isNewItem=<<4>>, itemSoundCategory=<<5>>,",
+            eventCode,
+            badId,
+            slotIndex,
+            isNewItem,
+            itemSoundCategory)
+
+    local z2 = zo_strformat ( "<<1>> inventoryUpdateReason=<<2>>, stackCountChange=<<3>>",
+            z,
+            inventoryUpdateReason,
+            stackCountChange)
+
+    EsoGrinder.DebugPrint(z2)
+end
+
+function EsoGrinder.EventMoneyUpdateHandler(newMoney, oldMoney, thisReason)
+    EsoGrinder.DebugPrintInFunction("EventMoneyUpdateHandler")
+
+    local delta_amount = newMoney - oldMoney
+    local reason = thisReason
+    local use_ecl = false
+
+    if use_ecl then
+        EsoGrinder.DebugPrint ( "Using esoui_constants_live.lua functions." )
+    end
+
+    local z = zo_strformat ( "newMoney=<<1>>, oldMoney=<<2>>, thisReason=<<3>>=<<4>>, delta_amount=<<5>>",
+            newMoney,
+            oldMoney,
+            thisReason,
+            reason,
+            delta_amount)
+
+    EsoGrinder.DebugPrint(z)
+end
+
 function EsoGrinder.EventCurrencyUpdateHandler(eventCode, currencyType, currencyLocation, newAmount, oldAmount, thisReason )
     EsoGrinder.DebugPrintInFunction("EventCurrencyUpdateHandler")
 
-    local new_amount = newAmount
-    local old_amount = oldAmount
-    local delta_amount = new_amount - old_amount
+    local delta_amount = newAmount - oldAmount
     local currency_type = currencyType
     local currency_location = currencyLocation
     local reason = thisReason
@@ -138,6 +214,8 @@ end
 
 function EsoGrinder.DelayedStartedMessage()
     EsoGrinder.DebugPrintInFunction("DelayedStartedMessage")
+
+    EsoGrinder.Print("Started.")
 end
 
 function EsoGrinder.OnAddOnLoaded(event, addonName)
