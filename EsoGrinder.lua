@@ -152,7 +152,7 @@ end
 function EsoGrinder.EventMoneyUpdateHandler(newMoney, oldMoney, thisReason)
     EsoGrinder.DebugPrintInFunction("EventMoneyUpdateHandler")
 
-    local delta_amount = newMoney - oldMoney
+    local delta_amount = oldMoney - newMoney
     local reason = thisReason
     local use_ecl = false
 
@@ -173,14 +173,14 @@ end
 function EsoGrinder.EventCurrencyUpdateHandler(eventCode, currencyType, currencyLocation, newAmount, oldAmount, thisReason )
     EsoGrinder.DebugPrintInFunction("EventCurrencyUpdateHandler")
 
-    local delta_amount = newAmount - oldAmount
+    local delta_amount = oldAmount - newAmount
     local currency_type = currencyType
     local currency_location = currencyLocation
     local reason = thisReason
     local use_ecl = false
 
     if use_ecl then
-        d ( "Using esoui_constants_live.lua functions." )
+        EsoGrinder.DebugPrint ( "Using esoui_constants_live.lua functions." )
         currency_type = CurrencyType_get_string(currencyType)
         currency_location = CurrencyLocation_get_string(currencyLocation)
         reason = CurrencyChangeReason_get_string(thisReason)
@@ -220,7 +220,7 @@ end
 
 function EsoGrinder.OnAddOnLoaded(event, addonName)
     EsoGrinder.function_call_count = 0
-    EsoGrinder.DebugPrintInFunction("OnAddOnLoaded")
+    EsoGrinder.DebugPrintInFunction(zo_strformat("OnAddOnLoaded (<<1>>)", addonName))
 
     if addonName == EsoGrinder.name then
         EsoGrinder.Initialize()
