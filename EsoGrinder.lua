@@ -1,186 +1,154 @@
--- This addon was hacked up from SnapShot.
+-- This addon was hacked up from SnapShot, LootLog, & AdvancedLootLog, and https://github.com/Baertram/ESO-ConstantsDumper
+EsoGrinderWip = {}
+EsoGrinderWip.name = "EsoGrinderWip"
 
-EsoGrinder = {}
-EsoGrinder.name = "EsoGrinder"
+EsoGrinderWip.ddebug = false
+EsoGrinderWip.ddebug_in_function = true
+EsoGrinderWip.started = true
+EsoGrinderWip.version = "3.0.0"
+EsoGrinderWip.version_eso_api = GetAPIVersion()
+EsoGrinderWip.function_call_count = 0
 
-EsoGrinder.Loots   = {}
-EsoGrinder.delim = 1
-EsoGrinder.ddebug = false
-EsoGrinder.started = true
-
-local Delimiters = {{label="Tab",value="\t"},{label="Semicolon",value=";"},{label="Slash",value="/"}}
-
--- ItemLink Hash Functions ---------------------------------------------------------------------------=
-
-local function GetItemLinkFromHash(itemHash)
-  return table.concat({"|H1:",string.gsub(itemHash,"!",":0"),"|h|h"})
+function EsoGrinderWip.Print(msg)
+    z = zo_strformat ( "EGRW <<1>>", msg)
+    d(z)
 end
 
-local function GetItemLinkHash(itemLink)
-  return string.gsub(string.sub(itemLink,5,-5),":0","!")
-end
-
--- Item Pricing Functions ----------------------------------------------------------------------------=
-
-local function GetPriceMM(itemLink)
-  if MasterMerchant then
-    local value = MasterMerchant.GetItemLinePrice(itemLink) or 0
-    if value < 10 then return math.floor(value*100+0.5)/100 end
-    if value < 100 then return math.floor(value*10+0.5)/10 end
-    return math.floor(value+0.5)
-  end
-  return -1 -- if MM not loaded
-end
-
-local function GetPriceTTC(itemLink)
-  if TamrielTradeCentre then
-    local iTTC = TamrielTradeCentrePrice:GetPriceInfo(itemLink)
-    if iTTC then
-      local value = (iTTC.SuggestedPrice or 0) * 1.25
-      if value == 0 then value = ((iTTC.Min or 0)+(iTTC.Avg or 0))/2 end
-      if value < 10 then return math.floor(value*100+0.5)/100 end
-      if value < 100 then return math.floor(value*10+0.5)/10 end
-      return math.floor(value+0.5)
-    end
-    return 0 -- if no TTC data record
-  end
-  return -1 -- if TTC not loaded
-end
-
-function EsoGrinder:Initialize()
-    self.savedVariables = ZO_SavedVars:NewAccountWide("EsoGrinderSavedVariables",1,nil,{})
-    self.loot_save      = self.savedVariables.loot_save     or 0
-    self.loot_save = {}
-    self.savedVariables.loot_save = {}
-
-    EVENT_MANAGER:RegisterForEvent(self.name,EVENT_LOOT_RECEIVED,self.LootLog)
-    EVENT_MANAGER:RegisterForEvent(self.name,EVENT_INVENTORY_SINGLE_SLOT_UPDATE,self.LootTake)
-
-    zo_callLater(function() d("EGR: Started.") end, 1000)
-end
- 
-function EsoGrinder.OnAddOnLoaded(event, addonName)
-    if addonName == EsoGrinder.name then
-    EsoGrinder:Initialize()
-    EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name,EVENT_ADD_ON_LOADED)
+function EsoGrinderWip.DebugPrintInFunction(msg)
+    EsoGrinderWip.function_call_count = EsoGrinderWip.function_call_count + 1
+    if EsoGrinderWip.ddebug_in_function then
+        EsoGrinderWip.Print(zo_strformat("--> <<1>> <<2>>", EsoGrinderWip.function_call_count, msg))
+        return
     end
 end
 
-function EsoGrinder.DebugPrint(print_string)
-    if EsoGrinder.ddbug then
-        d(print_string)
+function EsoGrinderWip.DebugPrint(msg)
+    if EsoGrinderWip.ddebug then
+        EsoGrinderWip.Print(msg)
+        return
     end
 end
 
-function EsoGrinder.OnSlashCommandDebug(extra)
-    if EsoGrinder.ddbug then
-        d("EGR: Debug off.")
-        EsoGrinder.ddbug = false
+function EsoGrinderWip.RegisterForAllEvents(extra)
+    EsoGrinderWip.DebugPrintInFunction("RegisterForAllEvents")
+
+    EVENT_MANAGER:RegisterForEvent(EsoGrinderWip.name,EVENT_CURRENCY_UPDATE,EsoGrinderWip.EventCurrencyUpdateHandler)
+end
+
+function EsoGrinderWip.UnregisterAllEvents(extra)
+    EsoGrinderWip.DebugPrintInFunction("UnregisterAllEvents")
+
+    EVENT_MANAGER:UnregisterForEvent(EsoGrinderWip.name, EVENT_CURRENCY_UPDATE)
+end
+
+function EsoGrinderWip.OnSlashCommandDebug(extra)
+    EsoGrinderWip.DebugPrintInFunction("OnSlashCommandDebug")
+
+    if EsoGrinderWip.ddebug then
+        EsoGrinderWip.ddebug = false
+        EsoGrinderWip.Print("Debug is now off.")
         return
     end
 
-    d("EGR: Debug on.")
-    EsoGrinder.ddbug = true
+    EsoGrinderWip.ddebug = true
+    EsoGrinderWip.Print("Debug is now on.")
 end
 
-function EsoGrinder.OnSlashCommandStart(extra)
-    if EsoGrinder.started then
-        d("EGR: Already started.")
+function EsoGrinderWip.OnSlashCommandStart(extra)
+    EsoGrinderWip.DebugPrintInFunction("OnSlashCommandStart")
+
+    if EsoGrinderWip.started then
+        EsoGrinderWip.DebugPrint("Already started.")
         return
     end
 
-    EVENT_MANAGER:RegisterForEvent(EsoGrinder.name,EVENT_LOOT_RECEIVED,EsoGrinder.LootLog)
-    EVENT_MANAGER:RegisterForEvent(EsoGrinder.name,EVENT_INVENTORY_SINGLE_SLOT_UPDATE,EsoGrinder.LootTake)
-    EsoGrinder.started = true
-    d("EGR: Started.")
+    EsoGrinderWip.RegisterForAllEvents()
+    EsoGrinderWip.started = true
+    EsoGrinderWip.DebugPrint("Started.")
 end
 
-function EsoGrinder.OnSlashCommandStop(extra)
-    if not EsoGrinder.started then
-        d("EGR: Not started.")
+function EsoGrinderWip.OnSlashCommandStop(extra)
+    EsoGrinderWip.DebugPrintInFunction("OnSlashCommandStop")
+
+    if not EsoGrinderWip.started then
+        EsoGrinderWip.DebugPrint("Not started.")
         return
     end
 
-    EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name, EVENT_LOOT_RECEIVED)
-    EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
-    EsoGrinder.started = false
-    d("EGR: Stopped.")
+    EsoGrinderWip.UnregisterAllEvents()
+    EsoGrinderWip.started = false
+    EsoGrinderWip.DebugPrint("Stopped.")
 end
 
-function EsoGrinder.OnSlashCommandApiVersion(extra)
-    EsoGrinder.DebugPrint(string.format("EGR: ESO APIVersion = %s",GetAPIVersion()))
+function EsoGrinderWip.OnSlashCommandVersion(extra)
+    EsoGrinderWip.DebugPrintInFunction("OnSlashCommandVersion")
+
+    EsoGrinderWip.Print(zo_strformat ( "Version = <<1>>", EsoGrinderWip.version))
+    EsoGrinderWip.Print(zo_strformat ( "ESO API Version =  <<1>>", EsoGrinderWip.version_eso_api))
 end
 
-SLASH_COMMANDS["/egrdebug"] = EsoGrinder.OnSlashCommandDebug
-SLASH_COMMANDS["/egrstart"] = EsoGrinder.OnSlashCommandStart
-SLASH_COMMANDS["/egrstop"] = EsoGrinder.OnSlashCommandStop
-SLASH_COMMANDS["/egrapiversion"] = EsoGrinder.OnSlashCommandApiVersion
+SLASH_COMMANDS["/egrdebug"] = EsoGrinderWip.OnSlashCommandDebug
+SLASH_COMMANDS["/egrstart"] = EsoGrinderWip.OnSlashCommandStart
+SLASH_COMMANDS["/egrstop"] = EsoGrinderWip.OnSlashCommandStop
+SLASH_COMMANDS["/egrversion"] = EsoGrinderWip.OnSlashCommandVersion
 
-function EsoGrinder.LootLog(ec,rv,nm,qt,sd,ty,sf,pk,ic,itemId,st) -- EVENT_LOOT_RECEIVED ---------------=
-    --d('LootLog')
-    if #EsoGrinder.Loots == 0 then return end
-    if EsoGrinder.Loots[#EsoGrinder.Loots].itemId == itemId
-    then EsoGrinder.Loots[#EsoGrinder.Loots].isLoot = true
+function EsoGrinderWip.EventCurrencyUpdateHandler(eventCode, currencyType, currencyLocation, newAmount, oldAmount, thisReason )
+    EsoGrinderWip.DebugPrintInFunction("EventCurrencyUpdateHandler")
 
-    local iLink = GetItemLinkFromHash(EsoGrinder.Loots[#EsoGrinder.Loots].hash)
-    local iStatus = "-"
-    local s = ""
-    local sz = 0
-    local x, y = GetMapPlayerPosition("player")
-    local player_location_name = GetPlayerLocationName()
-    local player_active_subzone_name = GetPlayerActiveSubzoneName()
-    local player_active_zone_name = GetPlayerActiveZoneName()
-    local player_status = GetPlayerStatus()
-    local player_name = GetUnitName("player")
-    if IsItemLinkBound(iLink) then iStatus = "B" end
-    if IsItemLinkStolen(iLink) then iStatus = "S" end
+    local new_amount = newAmount
+    local old_amount = oldAmount
+    local delta_amount = new_amount - old_amount
+    local currency_type = currencyType
+    local currency_location = currencyLocation
+    local reason = thisReason
+    local use_ecl = true
 
-    local iLine = {
-      EsoGrinder.Loots[#EsoGrinder.Loots].name,
-      EsoGrinder.Loots[#EsoGrinder.Loots].quantity,
-      GetItemLinkItemType(iLink),
-      GetItemLinkQuality(iLink),
-      iStatus,
-      GetItemLinkValue(iLink,false),
-      GetPriceMM(iLink),
-      GetPriceTTC(iLink),
-      os.date("%Y-%m-%d %H:%M:%S",GetTimeStamp()),
-      player_name,
-      x,
-      y,
-      player_location_name,
-      player_active_zone_name,
-      player_active_subzone_name,
-      player_status
-    }
-    s = table.concat(iLine,Delimiters[EsoGrinder.delim].value)
-    --d(s)
-    table.insert(EsoGrinder.loot_save, s)
-    sz = #EsoGrinder.loot_save
-    --d(sz)
-    el = EsoGrinder.loot_save[sz]
-    --d(el)
-    EsoGrinder.savedVariables.loot_save = EsoGrinder.loot_save
-    --el = EsoGrinder.savedVariables.loot_save[sz]
-    --d(el)
-    EsoGrinder.DebugPrint(string.format("EGR: %s %s",sz, el))
-  end
+    if use_ecl then
+        d ( "Using esoui_constants_live.lua functions." )
+        currency_type = CurrencyType_get_string(currencyType)
+        currency_location = CurrencyLocation_get_string(currencyLocation)
+        reason = CurrencyChangeReason_get_string(thisReason)
+    end
+
+    z = zo_strformat ( "eventCode=<<1>>, currencyType=<<2>>=<<3>>, currencyLocation=<<4>>=<<5>>,",
+            eventCode,
+            currencyType,
+            currency_type,
+            currencyLocation,
+            currency_location)
+
+    z2 = zo_strformat ( "<<1>> reason=<<2>>=<<3>>, newAmount=<<4>>, oldAmount=<<5>>, delta_amount=<<6>>",
+            z,
+            thisReason,
+            reason,
+            newAmount,
+            oldAmount,
+            delta_amount)
+
+    EsoGrinderWip.DebugPrint(z2)
 end
 
-function EsoGrinder.LootTake(ec,bag,slot,isNew,sd,re,qty) -- EVENT_INVENTORY_SINGLE_SLOT_UPDATE --------=
-  if isNew and qty > 0 then
-    --d('LootTake')
-    local itemName = zo_strformat(SI_TOOLTIP_ITEM_NAME,GetItemName(bag,slot))
-    local itemHash = GetItemLinkHash(GetItemLink(bag,slot))
-    table.insert(EsoGrinder.Loots,{
-      ["hash"] = itemHash,
-      ["isLoot"] = false,
-      ["itemId"] = GetItemId(bag,slot),
-      ["name"] = itemName,
-      ["quantity"] = qty,
-      ["when"] = os.date("%Y-%m-%d %H:%M:%S",GetTimeStamp())
-    })
-  end
+function EsoGrinderWip:Initialize()
+    self.ddebug = true
+
+    EsoGrinderWip.DebugPrintInFunction("Initialize")
+
+    self.RegisterForAllEvents()
 end
 
-EVENT_MANAGER:RegisterForEvent(EsoGrinder.name, EVENT_ADD_ON_LOADED, EsoGrinder.OnAddOnLoaded)
+function EsoGrinderWip:DelayedStartedMessage()
+    EsoGrinderWip.DebugPrintInFunction("DelayedStartedMessage")
+end
+
+function EsoGrinderWip.OnAddOnLoaded(event, addonName)
+    EsoGrinderWip.function_call_count = 0
+    EsoGrinderWip.DebugPrintInFunction("OnAddOnLoaded")
+
+    if addonName == EsoGrinderWip.name then
+        EsoGrinderWip:Initialize()
+        EVENT_MANAGER:UnregisterForEvent(EsoGrinderWip.name,EVENT_ADD_ON_LOADED)
+        zo_callLater(EsoGrinderWip.DelayedStartedMessage, 1000)
+    end
+end
+
+EVENT_MANAGER:RegisterForEvent(EsoGrinderWip.name, EVENT_ADD_ON_LOADED, EsoGrinderWip.OnAddOnLoaded)
