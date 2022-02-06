@@ -1,10 +1,10 @@
-## Title: ESO Grinder Work In Progess
+## Title: ESO Grinder
 ## Description: Log loot to your ESO save file and from there to a database via the EFSM Python service.
 ## Author: Marc Jordan
-## Version: 3.0.0
-## AddOnVersion: 3.0.0
+## Version: x
+## AddOnVersion: x
 ## APIVersion: 100028 100033 100035 101032
-## SavedVariables: EsoGrinderWipSavedVariables
+## SavedVariables: EsoGrinderSavedVariables
 
 ##
 ## This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. 
@@ -15,4 +15,4 @@
 
 
 esoui_constants_live.lua
-EsoGrinderWip.lua
+EsoGrinder.lua
