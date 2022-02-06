@@ -10,7 +10,7 @@ EsoGrinder.version_eso_api = GetAPIVersion()
 EsoGrinder.function_call_count = 0
 
 function EsoGrinder.Print(msg)
-    z = zo_strformat ( "EGR <<1>>", msg)
+    local z = zo_strformat ( "EGR <<1>>", msg)
     d(z)
 end
 
@@ -110,14 +110,14 @@ function EsoGrinder.EventCurrencyUpdateHandler(eventCode, currencyType, currency
         reason = CurrencyChangeReason_get_string(thisReason)
     end
 
-    z = zo_strformat ( "eventCode=<<1>>, currencyType=<<2>>=<<3>>, currencyLocation=<<4>>=<<5>>,",
+    local z = zo_strformat ( "eventCode=<<1>>, currencyType=<<2>>=<<3>>, currencyLocation=<<4>>=<<5>>,",
             eventCode,
             currencyType,
             currency_type,
             currencyLocation,
             currency_location)
 
-    z2 = zo_strformat ( "<<1>> reason=<<2>>=<<3>>, newAmount=<<4>>, oldAmount=<<5>>, delta_amount=<<6>>",
+    local z2 = zo_strformat ( "<<1>> reason=<<2>>=<<3>>, newAmount=<<4>>, oldAmount=<<5>>, delta_amount=<<6>>",
             z,
             thisReason,
             reason,
