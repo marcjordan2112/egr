@@ -2,7 +2,7 @@
 EsoGrinder = {}
 EsoGrinder.name = "EsoGrinder"
 
-EsoGrinder.ddebug = false
+EsoGrinder.ddebug = true
 EsoGrinder.ddebug_in_function = true
 EsoGrinder.started = true
 EsoGrinder.version = "x"
@@ -128,15 +128,15 @@ function EsoGrinder.EventCurrencyUpdateHandler(eventCode, currencyType, currency
     EsoGrinder.DebugPrint(z2)
 end
 
-function EsoGrinder:Initialize()
-    self.ddebug = true
-
+function EsoGrinder.Initialize()
+    EsoGrinder.ddebug = true
+    EsoGrinder.ddebug_in_function = true
     EsoGrinder.DebugPrintInFunction("Initialize")
 
-    self.RegisterForAllEvents()
+    EsoGrinder.RegisterForAllEvents()
 end
 
-function EsoGrinder:DelayedStartedMessage()
+function EsoGrinder.DelayedStartedMessage()
     EsoGrinder.DebugPrintInFunction("DelayedStartedMessage")
 end
 
@@ -145,7 +145,7 @@ function EsoGrinder.OnAddOnLoaded(event, addonName)
     EsoGrinder.DebugPrintInFunction("OnAddOnLoaded")
 
     if addonName == EsoGrinder.name then
-        EsoGrinder:Initialize()
+        EsoGrinder.Initialize()
         EVENT_MANAGER:UnregisterForEvent(EsoGrinder.name,EVENT_ADD_ON_LOADED)
         zo_callLater(EsoGrinder.DelayedStartedMessage, 1000)
     end
